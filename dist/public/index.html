@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+    <meta name="theme-color" content="#1B4FA0" />
+    <meta name="description" content="🌲ALLAN🌲 — Plateforme d'investissement au Niger. Inscrivez-vous, investissez et générez des revenus quotidiens. Bonus d'inscription : 200F." />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="ALLAN — Plateforme d'investissement" />
+    <meta property="og:description" content="🌲ALLAN🌲 — Plateforme d'investissement au Niger. Inscrivez-vous, investissez et générez des revenus quotidiens. Bonus d'inscription : 200F." />
+    <meta property="og:url" content="https://allan.replit.app" />
+    <meta property="og:image" content="https://allan.replit.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="ALLAN" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="ALLAN — Plateforme d'investissement" />
+    <meta name="twitter:description" content="🌲ALLAN🌲 — Plateforme d'investissement au Niger. Inscrivez-vous, investissez et générez des revenus quotidiens. Bonus d'inscription : 200F." />
+    <meta name="twitter:image" content="https://allan.replit.app/og-image.png" />
+    
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <script>
+      // Capture install prompt as early as possible before React mounts
+      window._installPrompt = null;
+      window.addEventListener('beforeinstallprompt', function(e) {
+        e.preventDefault();
+        window._installPrompt = e;
+      });
+      window.addEventListener('appinstalled', function() {
+        window._appInstalled = true;
+      });
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js');
+        });
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>ALLAN — Plateforme d'investissement</title>
+    <script type="module" crossorigin src="/assets/index-Bejj7c-y.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-D_a4ySWo.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
