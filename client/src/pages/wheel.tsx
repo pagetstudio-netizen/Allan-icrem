@@ -71,7 +71,7 @@ function drawWheel(canvas: HTMLCanvasElement, segments: number[], rotation: numb
     ctx.textAlign = "right";
     ctx.fillStyle = "#fff";
     ctx.font = `bold ${segments[i] === 0 ? "14" : "13"}px system-ui, sans-serif`;
-    ctx.fillText(segments[i] === 0 ? "Perdu" : `${segments[i]} USDT`, r - 12, 5);
+    ctx.fillText(segments[i] === 0 ? "Perdu" : `${segments[i]} FCFA`, r - 12, 5);
     ctx.restore();
   }
 
@@ -158,7 +158,7 @@ export default function WheelPage() {
 
   if (!user) return null;
   const country = getCountryByCode(user.country);
-  const currency = country?.currency || "USDT";
+  const currency = country?.currency || "FCFA";
 
   return (
     <div

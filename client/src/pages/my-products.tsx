@@ -52,7 +52,7 @@ export default function MyProductsPage() {
   if (!user) return null;
 
   const country = getCountryByCode(user.country);
-  const currency = country?.currency || "USDT";
+  const currency = country?.currency || "FCFA";
   const allProducts = userProducts || [];
 
   const activeProducts = allProducts.filter((p: any) => p.isActive !== false && (p.daysRemaining ?? 1) > 0);

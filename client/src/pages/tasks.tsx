@@ -71,7 +71,7 @@ export default function TasksPage() {
   if (!user) return null;
 
   const countryInfo = getCountryByCode(user.country);
-  const currency = countryInfo?.currency || "USDT";
+  const currency = countryInfo?.currency || "FCFA";
   const totalTaskRewards = tasks?.filter(t => t.isCompleted).reduce((sum, t) => sum + parseFloat(String(t.reward)), 0) || 0;
   const completedCount = tasks?.filter(t => t.isCompleted).length || 0;
   const claimableCount = tasks?.filter(t => t.canClaim && !t.isCompleted).length || 0;

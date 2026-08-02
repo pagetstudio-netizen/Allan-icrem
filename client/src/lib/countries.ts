@@ -1,14 +1,14 @@
 // Fallback country data (used if API not available)
 export const COUNTRIES = [
-  { code: "TD", name: "Tchad", flag: "TD", currency: "USDT", paymentMethods: ["Airtel Tchad", "Moov Africa Tchad"] },
-  { code: "NE", name: "Niger", flag: "NE", currency: "USDT", paymentMethods: ["NITA TRANSFERT", "AMANA TRANSFERT"] },
-  { code: "CF", name: "Centrafrique", flag: "CF", currency: "USDT", paymentMethods: ["Telecel Centrafrique", "Orange Centrafrique"] },
+  { code: "TD", name: "Tchad", flag: "TD", currency: "FCFA", paymentMethods: ["Airtel Tchad", "Moov Africa Tchad"] },
+  { code: "NE", name: "Niger", flag: "NE", currency: "FCFA", paymentMethods: ["NITA TRANSFERT", "AMANA TRANSFERT"] },
+  { code: "CF", name: "Centrafrique", flag: "CF", currency: "FCFA", paymentMethods: ["Telecel Centrafrique", "Orange Centrafrique"] },
 ];
 
 export const FALLBACK_COUNTRIES = [
-  { code: "TD", name: "Tchad", currency: "USDT", phonePrefix: "235", operators: ["Airtel Tchad", "Moov Africa Tchad"] },
-  { code: "NE", name: "Niger", currency: "USDT", phonePrefix: "227", operators: ["NITA TRANSFERT", "AMANA TRANSFERT"] },
-  { code: "CF", name: "Centrafrique", currency: "USDT", phonePrefix: "236", operators: ["Telecel Centrafrique", "Orange Centrafrique"] },
+  { code: "TD", name: "Tchad", currency: "FCFA", phonePrefix: "235", operators: ["Airtel Tchad", "Moov Africa Tchad"] },
+  { code: "NE", name: "Niger", currency: "FCFA", phonePrefix: "227", operators: ["NITA TRANSFERT", "AMANA TRANSFERT"] },
+  { code: "CF", name: "Centrafrique", currency: "FCFA", phonePrefix: "236", operators: ["Telecel Centrafrique", "Orange Centrafrique"] },
 ];
 
 // Legacy compatibility - kept for places still using ELIGIBLE_COUNTRIES directly
@@ -72,6 +72,6 @@ export function getPaymentMethodsForCountry(code: string, apiCountries?: ApiCoun
 
 export function formatCurrency(amount: number, countryCode: string, apiCountries?: ApiCountry[]): string {
   const country = getCountryByCode(countryCode, apiCountries);
-  const currency = country?.currency || "USDT";
+  const currency = country?.currency || "FCFA";
   return `${amount.toLocaleString()} ${currency}`;
 }

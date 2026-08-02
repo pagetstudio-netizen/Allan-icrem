@@ -167,14 +167,14 @@ export default function AdminStakingProducts() {
         <div className="grid grid-cols-2 gap-3">
           <FormField control={form.control} name="price" render={({ field }) => (
             <FormItem>
-              <FormLabel>Prix (USDT)</FormLabel>
+              <FormLabel>Prix (FCFA)</FormLabel>
               <FormControl><Input {...field} type="number" placeholder="Ex: 5000" /></FormControl>
               <FormMessage />
             </FormItem>
           )} />
           <FormField control={form.control} name="returnAmount" render={({ field }) => (
             <FormItem>
-              <FormLabel>Retour total (USDT)</FormLabel>
+              <FormLabel>Retour total (FCFA)</FormLabel>
               <FormControl><Input {...field} type="number" placeholder="Ex: 7500" /></FormControl>
               <FormMessage />
             </FormItem>
@@ -193,10 +193,10 @@ export default function AdminStakingProducts() {
         {price > 0 && returnAmount > 0 && lockDays > 0 && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm space-y-1">
             <p className="font-semibold text-amber-800">Aperçu du produit :</p>
-            <p className="text-amber-700">• Revenu quotidien : <strong>{dailyEarnings.toLocaleString()} USDT/j</strong></p>
-            <p className="text-amber-700">• Retour total : <strong>{returnAmount.toLocaleString()} USDT</strong></p>
+            <p className="text-amber-700">• Revenu quotidien : <strong>{dailyEarnings.toLocaleString()} FCFA/j</strong></p>
+            <p className="text-amber-700">• Retour total : <strong>{returnAmount.toLocaleString()} FCFA</strong></p>
             <p className={`font-semibold ${profit >= 0 ? "text-green-700" : "text-red-600"}`}>
-              • Profit utilisateur : {profit >= 0 ? "+" : ""}{profit.toLocaleString()} USDT ({price > 0 ? ((profit / price) * 100).toFixed(1) : 0}%)
+              • Profit utilisateur : {profit >= 0 ? "+" : ""}{profit.toLocaleString()} FCFA ({price > 0 ? ((profit / price) * 100).toFixed(1) : 0}%)
             </p>
           </div>
         )}
@@ -295,15 +295,15 @@ export default function AdminStakingProducts() {
                     <div className="grid grid-cols-4 gap-2 text-xs mt-2">
                       <div>
                         <p className="text-muted-foreground">Prix</p>
-                        <p className="font-semibold">{p.price.toLocaleString()} USDT</p>
+                        <p className="font-semibold">{p.price.toLocaleString()} FCFA</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Retour total</p>
-                        <p className="font-semibold text-amber-600">{p.returnAmount.toLocaleString()} USDT</p>
+                        <p className="font-semibold text-amber-600">{p.returnAmount.toLocaleString()} FCFA</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Quotidien</p>
-                        <p className="font-semibold">{dailyEarnings.toLocaleString()} USDT</p>
+                        <p className="font-semibold">{dailyEarnings.toLocaleString()} FCFA</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Durée</p>

@@ -173,11 +173,11 @@ export default function AdminStaking() {
                           <div className="grid grid-cols-3 gap-2 text-sm">
                             <div className="bg-secondary/50 rounded-lg p-2 text-center">
                               <p className="text-muted-foreground text-xs">Prix</p>
-                              <p className="font-bold text-primary">{sp.price.toLocaleString()} USDT</p>
+                              <p className="font-bold text-primary">{sp.price.toLocaleString()} FCFA</p>
                             </div>
                             <div className="bg-secondary/50 rounded-lg p-2 text-center">
                               <p className="text-muted-foreground text-xs">Retour</p>
-                              <p className="font-bold text-green-600">{sp.returnAmount.toLocaleString()} USDT</p>
+                              <p className="font-bold text-green-600">{sp.returnAmount.toLocaleString()} FCFA</p>
                             </div>
                             <div className="bg-secondary/50 rounded-lg p-2 text-center">
                               <p className="text-muted-foreground text-xs">Durée</p>
@@ -223,11 +223,11 @@ export default function AdminStaking() {
             </div>
             <div className="bg-secondary rounded-xl p-3 text-center">
               <p className="text-xs text-muted-foreground">Total bloqué</p>
-              <p className="font-bold text-orange-600">{totalStaked.toLocaleString()} USDT</p>
+              <p className="font-bold text-orange-600">{totalStaked.toLocaleString()} FCFA</p>
             </div>
             <div className="bg-secondary rounded-xl p-3 text-center">
               <p className="text-xs text-muted-foreground">Total libéré</p>
-              <p className="font-bold text-green-600">{totalReleased.toLocaleString()} USDT</p>
+              <p className="font-bold text-green-600">{totalReleased.toLocaleString()} FCFA</p>
             </div>
           </div>
 
@@ -250,7 +250,7 @@ export default function AdminStaking() {
                         </div>
                         <p className="text-xs text-muted-foreground">{s.user.phone} · {s.product.name}</p>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          {s.amountPaid.toLocaleString()} USDT → {s.returnAmount.toLocaleString()} USDT · Déblocage : {formatDate(s.releaseDate)}
+                          {s.amountPaid.toLocaleString()} FCFA → {s.returnAmount.toLocaleString()} FCFA · Déblocage : {formatDate(s.releaseDate)}
                         </p>
                       </div>
                       <div className="text-right">

@@ -192,7 +192,7 @@ export default function AdminProducts() {
         <div className="bg-primary/10 rounded-lg p-3 text-sm">
           <p className="text-muted-foreground">Retour total estimé :</p>
           <p className="font-bold text-primary text-lg">
-            {(parseFloat(form.watch("dailyEarnings") || "0") * parseInt(form.watch("cycleDays") || "0")).toLocaleString()} USDT
+            {(parseFloat(form.watch("dailyEarnings") || "0") * parseInt(form.watch("cycleDays") || "0")).toLocaleString()} FCFA
           </p>
         </div>
       )}
@@ -236,7 +236,7 @@ export default function AdminProducts() {
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {product.price.toLocaleString()} USDT — {product.dailyEarnings.toLocaleString()} USDT/jour
+                      {product.price.toLocaleString()} FCFA — {product.dailyEarnings.toLocaleString()} FCFA/jour
                     </p>
                   </div>
                 </div>
@@ -267,15 +267,15 @@ export default function AdminProducts() {
               <div className="grid grid-cols-3 gap-2 text-sm">
                 <div>
                   <p className="text-muted-foreground">Prix</p>
-                  <p className="font-medium text-foreground">{product.price.toLocaleString()} USDT</p>
+                  <p className="font-medium text-foreground">{product.price.toLocaleString()} FCFA</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Gains/jour</p>
-                  <p className="font-medium text-foreground">{product.dailyEarnings.toLocaleString()} USDT</p>
+                  <p className="font-medium text-foreground">{product.dailyEarnings.toLocaleString()} FCFA</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Total ({product.cycleDays}j)</p>
-                  <p className="font-medium text-primary">{product.totalReturn.toLocaleString()} USDT</p>
+                  <p className="font-medium text-primary">{product.totalReturn.toLocaleString()} FCFA</p>
                 </div>
               </div>
             </CardContent>

@@ -64,7 +64,7 @@ export default function InvestPage() {
 
   const balance = parseFloat(user.balance || "0");
   const country = getCountryByCode(user.country);
-  const currency = country?.currency || "USDT";
+  const currency = country?.currency || "FCFA";
 
   return (
     <div className="flex flex-col min-h-full bg-gray-100">

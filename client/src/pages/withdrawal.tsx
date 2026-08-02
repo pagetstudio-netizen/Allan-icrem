@@ -26,7 +26,7 @@ export default function WithdrawalPage() {
   const [, navigate] = useLocation();
 
   const countryInfo = user ? getCountryByCode(user.country) : null;
-  const currency = countryInfo?.currency || "USDT";
+  const currency = countryInfo?.currency || "FCFA";
 
   const { data: settings } = useQuery<{
     withdrawalFees: number;
