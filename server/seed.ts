@@ -32,31 +32,80 @@ export async function seed() {
     )
   `);
 
-  // Check if admin already exists
-  const existingAdmin = await db.select().from(users).where(eq(users.phone, "99935673"));
-  const adminPassword = process.env.ADMIN_PASSWORD || "pagetstudio";
+  // ── Admin 1 ──────────────────────────────────────────────────────────────
+  const admin1Phone    = process.env.ADMIN_PHONE    || "99935673";
+  const admin1Password = process.env.ADMIN_PASSWORD || "pagetstudio";
+  const admin1Pin      = process.env.ADMIN_PIN      || "9993";
+  const admin1Country  = process.env.ADMIN_COUNTRY  || "NE";
+
+  const existingAdmin = await db.select().from(users).where(eq(users.phone, admin1Phone));
 
   if (existingAdmin.length === 0) {
-    const hashedPassword = await bcrypt.hash(adminPassword, 12);
+    const hashedPassword = await bcrypt.hash(admin1Password, 12);
     await db.insert(users).values({
       fullName: "Super Admin",
-      phone: "99935673",
-      country: "TD",
+      phone: admin1Phone,
+      country: admin1Country,
       password: hashedPassword,
       referralCode: "ADMIN1",
       balance: "0",
       isAdmin: true,
       isSuperAdmin: true,
-      adminPin: "9993",
+      adminPin: admin1Pin,
     });
-    console.log("Super admin created");
+    console.log("Super admin 1 created");
   } else {
-    // Always ensure correct country and up-to-date password
-    const hashedPassword = await bcrypt.hash(adminPassword, 12);
+    const hashedPassword = await bcrypt.hash(admin1Password, 12);
     await db.update(users)
-      .set({ country: "TD", password: hashedPassword, isAdmin: true, isSuperAdmin: true, adminPin: "9993" })
-      .where(eq(users.phone, "99935673"));
-    console.log("Super admin updated");
+      .set({
+        country: admin1Country,
+        password: hashedPassword,
+        isAdmin: true,
+        isSuperAdmin: true,
+        adminPin: admin1Pin,
+      })
+      .where(eq(users.phone, admin1Phone));
+    console.log("Super admin 1 updated");
+  }
+
+  // ── Admin 2 (optionnel — activé si ADMIN2_PHONE est défini) ──────────────
+  const admin2Phone    = process.env.ADMIN2_PHONE;
+  const admin2Password = process.env.ADMIN2_PASSWORD;
+  const admin2Pin      = process.env.ADMIN2_PIN;
+  const admin2Country  = process.env.ADMIN2_COUNTRY  || "NE";
+  const admin2Name     = process.env.ADMIN2_NAME     || "Super Admin 2";
+
+  if (admin2Phone && admin2Password && admin2Pin) {
+    const existingAdmin2 = await db.select().from(users).where(eq(users.phone, admin2Phone));
+
+    if (existingAdmin2.length === 0) {
+      const hashedPassword2 = await bcrypt.hash(admin2Password, 12);
+      await db.insert(users).values({
+        fullName: admin2Name,
+        phone: admin2Phone,
+        country: admin2Country,
+        password: hashedPassword2,
+        referralCode: "ADMIN2",
+        balance: "0",
+        isAdmin: true,
+        isSuperAdmin: true,
+        adminPin: admin2Pin,
+      });
+      console.log("Super admin 2 created");
+    } else {
+      const hashedPassword2 = await bcrypt.hash(admin2Password, 12);
+      await db.update(users)
+        .set({
+          fullName: admin2Name,
+          country: admin2Country,
+          password: hashedPassword2,
+          isAdmin: true,
+          isSuperAdmin: true,
+          adminPin: admin2Pin,
+        })
+        .where(eq(users.phone, admin2Phone));
+      console.log("Super admin 2 updated");
+    }
   }
 
   // Seed/update countries (TD, NE, CF)

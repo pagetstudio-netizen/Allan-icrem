@@ -49,6 +49,11 @@ expertMode = true
 [userenv]
 
 [userenv.shared]
+ADMIN2_COUNTRY = "NE"
+ADMIN2_NAME = "Super Admin 2"
+ADMIN2_PHONE = "61630556"
+ADMIN_COUNTRY = "NE"
+ADMIN_PHONE = "99935673"
 
 [postMerge]
 path = "scripts/post-merge.sh"
