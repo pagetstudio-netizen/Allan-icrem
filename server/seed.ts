@@ -142,12 +142,12 @@ export async function seed() {
       await db.insert(countries).values(countryData);
       console.log(`Country added: ${countryData.name}`);
     } else {
+      // isActive intentionnellement exclu : l'admin gère l'activation/désactivation, le seed ne l'écrase pas
       await db.update(countries).set({
         name: countryData.name,
         currency: countryData.currency,
         phonePrefix: countryData.phonePrefix,
         operators: countryData.operators,
-        isActive: countryData.isActive,
       }).where(eq(countries.code, countryData.code));
       console.log(`Country updated: ${countryData.name}`);
     }
