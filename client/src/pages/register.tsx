@@ -97,7 +97,7 @@ export default function RegisterPage() {
 
   return (
     <div
-      className="min-h-screen flex flex-col"
+      className="fixed inset-0 overflow-hidden"
       style={{
         backgroundImage: `url(${authBg})`,
         backgroundSize: "cover",
@@ -107,15 +107,15 @@ export default function RegisterPage() {
     >
       {/* Dark overlay */}
       <div
-        className="fixed inset-0 z-0"
+        className="absolute inset-0 z-0"
         style={{ background: "rgba(10,5,2,0.82)" }}
       />
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col min-h-screen px-6 pt-12 pb-10 max-w-sm mx-auto w-full">
+      <div className="relative z-10 flex flex-col justify-center h-full px-6 py-4 max-w-sm mx-auto w-full">
 
         {/* Logo */}
-        <div className="flex flex-col items-center mb-8">
+        <div className="flex flex-col items-center mb-4">
           <div
             className="rounded-2xl overflow-hidden mb-3"
             style={{
@@ -130,7 +130,7 @@ export default function RegisterPage() {
         </div>
 
         {/* Form */}
-        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-3">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-2.5">
 
           {/* Phone field */}
           <div
