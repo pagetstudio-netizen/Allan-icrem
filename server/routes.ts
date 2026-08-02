@@ -2,8 +2,6 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import session from "express-session";
 import { storage } from "./storage";
-import { db } from "./db";
-import { sql } from "drizzle-orm";
 import bcrypt from "bcrypt";
 import { registerSchema, loginSchema } from "@shared/schema";
 import { z } from "zod";
@@ -171,24 +169,6 @@ export async function registerRoutes(
       },
     })
   );
-
-  // Health check — utile pour diagnostiquer la connexion DB en production
-  app.get("/api/health", async (_req, res) => {
-    const checks: Record<string, string> = {};
-    checks.supabase_url = process.env.SUPABASE_DATABASE_URL ? "ok" : "MANQUANT";
-    checks.session_secret = process.env.SESSION_SECRET ? "ok" : "MANQUANT";
-    checks.admin_phone = process.env.ADMIN_PHONE ? "ok" : "fallback (99935673)";
-    checks.admin_password = process.env.ADMIN_PASSWORD ? "ok" : "fallback (pagetstudio)";
-    checks.node_env = process.env.NODE_ENV || "non défini";
-    try {
-      await db.execute(sql`SELECT 1`);
-      checks.db = "connecté";
-    } catch (e: any) {
-      checks.db = `ERREUR: ${e.message}`;
-    }
-    const ok = checks.db === "connecté" && checks.supabase_url === "ok";
-    res.status(ok ? 200 : 500).json({ status: ok ? "ok" : "dégradé", checks });
-  });
 
   // Auth routes
   app.post("/api/auth/register", async (req, res) => {
