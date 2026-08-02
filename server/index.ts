@@ -14,16 +14,35 @@ declare module "http" {
   }
 }
 
+// Security: CORS — only same-origin in production
+app.use((req, res, next) => {
+  const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(",").map((o) => o.trim())
+    : [];
+  const origin = req.headers.origin;
+  if (process.env.NODE_ENV === "development") {
+    res.setHeader("Access-Control-Allow-Origin", origin || "*");
+  } else if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
+  if (req.method === "OPTIONS") return res.sendStatus(204);
+  next();
+});
+
+// Security: limit body size — 2 MB for JSON (screenshots are base64 ~1.3× raw size)
 app.use(
   express.json({
-    limit: "15mb",
+    limit: "2mb",
     verify: (req, _res, buf) => {
       req.rawBody = buf;
     },
   }),
 );
 
-app.use(express.urlencoded({ extended: false, limit: "15mb" }));
+app.use(express.urlencoded({ extended: false, limit: "2mb" }));
 
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {

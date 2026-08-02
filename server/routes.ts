@@ -16,8 +16,10 @@ import {
 
 // --- Brute-force protection (in-memory) ---
 const loginAttempts = new Map<string, { count: number; blockedUntil: number }>();
+const pinAttempts   = new Map<string, { count: number; blockedUntil: number }>();
 const MAX_LOGIN_ATTEMPTS = 5;
-const BLOCK_DURATION_MS = 15 * 60 * 1000; // 15 minutes
+const MAX_PIN_ATTEMPTS   = 5;
+const BLOCK_DURATION_MS  = 15 * 60 * 1000; // 15 min
 
 function getClientKey(req: Request): string {
   const forwarded = req.headers["x-forwarded-for"];
@@ -25,10 +27,9 @@ function getClientKey(req: Request): string {
   return ip;
 }
 
-function checkBruteForce(req: Request, res: Response): boolean {
-  const key = getClientKey(req);
+function checkBruteForce(map: Map<string, { count: number; blockedUntil: number }>, key: string, res: Response): boolean {
   const now = Date.now();
-  const record = loginAttempts.get(key);
+  const record = map.get(key);
   if (record && record.blockedUntil > now) {
     const minutesLeft = Math.ceil((record.blockedUntil - now) / 60000);
     res.status(429).json({ message: `Trop de tentatives. Réessayez dans ${minutesLeft} minute(s).` });
@@ -37,22 +38,49 @@ function checkBruteForce(req: Request, res: Response): boolean {
   return false;
 }
 
-function recordFailedAttempt(req: Request) {
-  const key = getClientKey(req);
+function recordFailedAttempt(map: Map<string, { count: number; blockedUntil: number }>, key: string, maxAttempts = MAX_LOGIN_ATTEMPTS) {
   const now = Date.now();
-  const record = loginAttempts.get(key) || { count: 0, blockedUntil: 0 };
+  const record = map.get(key) || { count: 0, blockedUntil: 0 };
   record.count += 1;
-  if (record.count >= MAX_LOGIN_ATTEMPTS) {
+  if (record.count >= maxAttempts) {
     record.blockedUntil = now + BLOCK_DURATION_MS;
     record.count = 0;
   }
-  loginAttempts.set(key, record);
+  map.set(key, record);
 }
 
-function clearFailedAttempts(req: Request) {
-  loginAttempts.delete(getClientKey(req));
+function clearAttempts(map: Map<string, { count: number; blockedUntil: number }>, key: string) {
+  map.delete(key);
 }
+
+// Convenience wrappers for login
+function checkLoginBruteForce(req: Request, res: Response): boolean {
+  return checkBruteForce(loginAttempts, getClientKey(req), res);
+}
+function recordLoginFailed(req: Request) { recordFailedAttempt(loginAttempts, getClientKey(req)); }
+function clearLoginAttempts(req: Request) { clearAttempts(loginAttempts, getClientKey(req)); }
+
+// Convenience wrappers for admin PIN (keyed by userId to prevent cross-IP bypass)
+function checkPinBruteForce(userId: number, res: Response): boolean {
+  return checkBruteForce(pinAttempts, `pin_${userId}`, res);
+}
+function recordPinFailed(userId: number) { recordFailedAttempt(pinAttempts, `pin_${userId}`, MAX_PIN_ATTEMPTS); }
+function clearPinAttempts(userId: number) { clearAttempts(pinAttempts, `pin_${userId}`); }
 // --- end brute-force protection ---
+
+// --- Screenshot validation helper ---
+const MAX_SCREENSHOT_BYTES = 1_200_000; // ~900 KB raw ≈ 1.2 MB base64
+const ALLOWED_IMG_PREFIXES = ["data:image/jpeg;base64,", "data:image/jpg;base64,", "data:image/png;base64,", "data:image/webp;base64,"];
+
+function validateScreenshot(screenshot: unknown): string | null {
+  if (screenshot === null || screenshot === undefined || screenshot === "") return null;
+  if (typeof screenshot !== "string") return null; // silently drop non-strings
+  const allowed = ALLOWED_IMG_PREFIXES.some((p) => screenshot.startsWith(p));
+  if (!allowed) throw new Error("Format d'image non supporté. Utilisez JPG, PNG ou WebP.");
+  if (screenshot.length > MAX_SCREENSHOT_BYTES) throw new Error("Image trop volumineuse (max ~900 Ko).");
+  return screenshot;
+}
+// --- end screenshot validation ---
 
 declare module "express-session" {
   interface SessionData {
@@ -105,15 +133,32 @@ export async function registerRoutes(
   // Trust proxy for production HTTPS (Replit deployment)
   app.set("trust proxy", 1);
 
+  // Security: validate SESSION_SECRET is set
+  if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET.length < 32) {
+    throw new Error("SESSION_SECRET must be set and at least 32 characters long");
+  }
+
+  // Security: HTTP security headers
+  app.use((_req, res, next) => {
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "DENY");
+    res.setHeader("X-XSS-Protection", "1; mode=block");
+    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+    res.setHeader("Permissions-Policy", "geolocation=(), camera=(), microphone=()");
+    next();
+  });
+
+  const dbConnString = process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL;
+
   app.use(
     session({
       store: new PgSession({
-        conString: process.env.DATABASE_URL,
+        conString: dbConnString,
         tableName: "session",
         createTableIfMissing: false,
         pruneSessionInterval: 60 * 60,
       }),
-      secret: process.env.SESSION_SECRET!,
+      secret: process.env.SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
       cookie: {
@@ -164,19 +209,19 @@ export async function registerRoutes(
   });
 
   app.post("/api/auth/login", async (req, res) => {
-    if (checkBruteForce(req, res)) return;
+    if (checkLoginBruteForce(req, res)) return;
     try {
       const data = loginSchema.parse(req.body);
       
       const user = await storage.getUserByPhone(data.phone, data.country);
       if (!user) {
-        recordFailedAttempt(req);
+        recordLoginFailed(req);
         return res.status(400).json({ message: "Identifiants incorrects" });
       }
 
       const validPassword = await bcrypt.compare(data.password, user.password);
       if (!validPassword) {
-        recordFailedAttempt(req);
+        recordLoginFailed(req);
         return res.status(400).json({ message: "Identifiants incorrects" });
       }
 
@@ -184,7 +229,7 @@ export async function registerRoutes(
         return res.status(403).json({ message: "Compte suspendu" });
       }
 
-      clearFailedAttempts(req);
+      clearLoginAttempts(req);
       req.session.userId = user.id;
       res.json({ user: safeUser(user) });
     } catch (error: any) {
@@ -620,20 +665,30 @@ export async function registerRoutes(
     }
   });
 
+  const paymentNumberSchema = z.object({
+    ownerName: z.string().min(2).max(100).regex(/^[A-Za-zÀ-öø-ÿ0-9\s\-'.]+$/, "Nom invalide"),
+    phone: z.string().min(6).max(20).regex(/^[\d\s\-+()]+$/, "Numéro invalide"),
+    operatorName: z.string().min(2).max(60),
+    country: z.string().length(2).regex(/^[A-Z]{2}$/),
+    logoUrl: z.string().url().max(500).optional().nullable(),
+    isActive: z.boolean().optional(),
+  });
+
   app.post("/api/admin/payment-numbers", requireAdmin, async (req, res) => {
     try {
-      const { ownerName, phone, operatorName, country, logoUrl, isActive } = req.body;
-      if (!ownerName || !phone || !operatorName || !country) {
-        return res.status(400).json({ message: "Tous les champs sont requis" });
-      }
+      const data = paymentNumberSchema.parse(req.body);
       const num = await storage.createPaymentNumber({
-        ownerName, phone, operatorName, country,
-        logoUrl: logoUrl || null,
-        isActive: isActive !== false,
+        ownerName: data.ownerName,
+        phone: data.phone,
+        operatorName: data.operatorName,
+        country: data.country,
+        logoUrl: data.logoUrl || null,
+        isActive: data.isActive !== false,
         createdBy: req.session.userId,
       });
       res.json(num);
     } catch (error: any) {
+      if (error instanceof z.ZodError) return res.status(400).json({ message: error.errors[0].message });
       res.status(400).json({ message: error.message });
     }
   });
@@ -641,10 +696,12 @@ export async function registerRoutes(
   app.put("/api/admin/payment-numbers/:id", requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const { ownerName, phone, operatorName, country, logoUrl, isActive } = req.body;
-      const num = await storage.updatePaymentNumber(id, { ownerName, phone, operatorName, country, logoUrl, isActive });
+      if (isNaN(id)) return res.status(400).json({ message: "ID invalide" });
+      const data = paymentNumberSchema.partial().parse(req.body);
+      const num = await storage.updatePaymentNumber(id, data);
       res.json(num);
     } catch (error: any) {
+      if (error instanceof z.ZodError) return res.status(400).json({ message: error.errors[0].message });
       res.status(400).json({ message: error.message });
     }
   });
@@ -740,19 +797,22 @@ export async function registerRoutes(
 
 
 
+      // Security: validate screenshot MIME type + size before storing
+      const validatedScreenshot = validateScreenshot(screenshot);
+
       const deposit = await storage.createDeposit({
         userId: req.session.userId!,
         amount,
-        accountName,
-        accountNumber,
-        country,
-        paymentMethod,
+        accountName: String(accountName).trim().slice(0, 100),
+        accountNumber: String(accountNumber).trim().slice(0, 30),
+        country: String(country).trim().toUpperCase().slice(0, 2),
+        paymentMethod: String(paymentMethod).trim().slice(0, 60),
         paymentChannelId: paymentChannelId && paymentChannelId > 0 ? paymentChannelId : null,
         paymentNumberId: paymentNumberId || null,
-        channelName: channelName || null,
-        screenshot: screenshot || null,
-        paymentMessage: paymentMessage || null,
-        reference: reference || null,
+        channelName: channelName ? String(channelName).trim().slice(0, 80) : null,
+        screenshot: validatedScreenshot,
+        paymentMessage: paymentMessage ? String(paymentMessage).trim().slice(0, 500) : null,
+        reference: reference ? String(reference).trim().slice(0, 100) : null,
         status: "pending",
       });
 
@@ -1288,17 +1348,24 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/admin/verify-pin", requireAuth, async (req, res) => {
+  app.post("/api/admin/verify-pin", requireAdmin, async (req, res) => {
     try {
+      const userId = req.session.userId!;
+      if (checkPinBruteForce(userId, res)) return;
+
       const { pin } = req.body;
-      const user = await storage.getUser(req.session.userId!);
-      
+      if (!pin || typeof pin !== "string" || !/^\d{4,8}$/.test(pin)) {
+        return res.status(400).json({ message: "Format de PIN invalide" });
+      }
+
+      const user = await storage.getUser(userId);
       if (!user?.isAdmin) {
         return res.status(403).json({ message: "Acces refuse" });
       }
       
       // If password is not required for this admin, auto-verify
       if (user.isAdminPasswordRequired === false) {
+        clearPinAttempts(userId);
         return res.json({ success: true });
       }
 
@@ -1307,9 +1374,11 @@ export async function registerRoutes(
       }
       
       if (user.adminPin !== pin) {
+        recordPinFailed(userId);
         return res.status(401).json({ message: "Code PIN incorrect" });
       }
       
+      clearPinAttempts(userId);
       res.json({ success: true });
     } catch (error: any) {
       res.status(400).json({ message: error.message });

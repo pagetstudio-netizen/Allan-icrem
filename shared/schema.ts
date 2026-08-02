@@ -334,38 +334,78 @@ export const insertUserSchema = createInsertSchema(users).omit({
 
 export const insertCountrySchema = createInsertSchema(countries).omit({ id: true });
 
+// ─── Shared sanitizers ────────────────────────────────────────────────────────
+// Phone: digits only, 8–15 chars (ITU-T E.164 without the leading "+")
+const phoneSchema = z
+  .string()
+  .min(8, "Numéro de téléphone invalide (min 8 chiffres)")
+  .max(15, "Numéro de téléphone invalide (max 15 chiffres)")
+  .regex(/^\d{8,15}$/, "Le numéro de téléphone ne doit contenir que des chiffres");
+
+// Country: exactly 2 uppercase letters (ISO 3166-1 alpha-2)
+const countryCodeSchema = z
+  .string()
+  .length(2, "Code pays invalide")
+  .regex(/^[A-Z]{2}$/, "Code pays invalide");
+
+// Account name: Latin letters (incl. accented), digits, spaces, hyphens
+// Uses a broad ASCII + extended-Latin range instead of \p{L} to stay ES5-safe
+const accountNameSchema = z
+  .string()
+  .min(2, "Le nom du compte est requis")
+  .max(100, "Nom trop long")
+  .regex(/^[A-Za-zÀ-öø-ÿ0-9\s\-'.]+$/, "Caractères non autorisés dans le nom");
+
+// Account number: digits, spaces, hyphens, plus, parentheses only
+const accountNumberSchema = z
+  .string()
+  .min(6, "Numéro de compte invalide (min 6 caractères)")
+  .max(30, "Numéro de compte trop long")
+  .regex(/^[\d\s\-+()]+$/, "Le numéro ne doit contenir que des chiffres");
+
 export const registerSchema = z.object({
-  fullName: z.string().min(2, "Le nom complet est requis"),
-  phone: z.string().min(8, "Numéro de téléphone invalide"),
-  country: z.string().min(2, "Le pays est requis"),
-  password: z.string().min(6, "Le mot de passe doit avoir au moins 6 caractères"),
-  invitationCode: z.string().optional(),
+  fullName: z
+    .string()
+    .min(2, "Le nom complet est requis")
+    .max(100, "Nom trop long")
+    .regex(/^[A-Za-zÀ-öø-ÿ\s\-'.]+$/, "Caractères non autorisés dans le nom"),
+  phone: phoneSchema,
+  country: countryCodeSchema,
+  password: z
+    .string()
+    .min(6, "Le mot de passe doit avoir au moins 6 caractères")
+    .max(72, "Mot de passe trop long"), // bcrypt max
+  invitationCode: z
+    .string()
+    .max(20)
+    .regex(/^[A-Z0-9]*$/, "Code d'invitation invalide")
+    .optional(),
 });
 
 export const loginSchema = z.object({
-  phone: z.string().min(8, "Numéro de téléphone invalide"),
-  country: z.string().min(2, "Le pays est requis"),
-  password: z.string().min(1, "Le mot de passe est requis"),
+  phone: phoneSchema,
+  country: countryCodeSchema,
+  password: z.string().min(1, "Le mot de passe est requis").max(72),
 });
 
 export const depositSchema = z.object({
-  amount: z.number().min(2000, "Le montant minimum est de 2000 FCFA"),
-  accountName: z.string().min(2, "Le nom du compte est requis"),
-  accountNumber: z.string().min(8, "Le numéro de paiement est requis"),
-  country: z.string().min(2, "Le pays est requis"),
-  paymentMethod: z.string().min(2, "Le moyen de paiement est requis"),
-  paymentChannelId: z.number(),
+  amount: z.number().int("Montant invalide").min(2000, "Le montant minimum est de 2000 FCFA").max(10_000_000, "Montant trop élevé"),
+  accountName: accountNameSchema,
+  accountNumber: accountNumberSchema,
+  country: countryCodeSchema,
+  paymentMethod: z.string().min(2).max(60),
+  paymentChannelId: z.number().int().nonnegative(),
 });
 
 export const withdrawalSchema = z.object({
-  amount: z.number().min(1000, "Le montant minimum est de 1000 FCFA"),
+  amount: z.number().int("Montant invalide").min(1000, "Le montant minimum est de 1000 FCFA").max(10_000_000, "Montant trop élevé"),
 });
 
 export const walletSchema = z.object({
-  accountName: z.string().min(2, "Le nom du compte est requis"),
-  accountNumber: z.string().min(8, "Le numéro est requis"),
-  paymentMethod: z.string().min(2, "Le moyen de paiement est requis"),
-  country: z.string().min(2, "Le pays est requis"),
+  accountName: accountNameSchema,
+  accountNumber: accountNumberSchema,
+  paymentMethod: z.string().min(2).max(60),
+  country: countryCodeSchema,
 });
 
 export const giftCodeSchema = z.object({
