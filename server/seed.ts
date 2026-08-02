@@ -116,7 +116,7 @@ export async function seed() {
       currency: "XAF",
       phonePrefix: "235",
       operators: JSON.stringify(["Airtel Tchad", "Moov Africa Tchad"]),
-      isActive: true,
+      isActive: false,
     },
     {
       code: "NE",
@@ -132,7 +132,7 @@ export async function seed() {
       currency: "XAF",
       phonePrefix: "236",
       operators: JSON.stringify(["Telecel Centrafrique", "Orange Centrafrique"]),
-      isActive: true,
+      isActive: false,
     },
   ];
 
