@@ -6,9 +6,9 @@ export const COUNTRIES = [
 ];
 
 export const FALLBACK_COUNTRIES = [
-  { code: "TD", name: "Tchad", currency: "FCFA", phonePrefix: "235", operators: ["Airtel Tchad", "Moov Africa Tchad"] },
-  { code: "NE", name: "Niger", currency: "FCFA", phonePrefix: "227", operators: ["NITA TRANSFERT", "AMANA TRANSFERT"] },
-  { code: "CF", name: "Centrafrique", currency: "FCFA", phonePrefix: "236", operators: ["Telecel Centrafrique", "Orange Centrafrique"] },
+  { code: "TD", name: "Tchad", currency: "FCFA", phonePrefix: "235", operators: ["Airtel Tchad", "Moov Africa Tchad"], isActive: false },
+  { code: "NE", name: "Niger", currency: "FCFA", phonePrefix: "227", operators: ["NITA TRANSFERT", "AMANA TRANSFERT"], isActive: true },
+  { code: "CF", name: "Centrafrique", currency: "FCFA", phonePrefix: "236", operators: ["Telecel Centrafrique", "Orange Centrafrique"], isActive: false },
 ];
 
 // Legacy compatibility - kept for places still using ELIGIBLE_COUNTRIES directly

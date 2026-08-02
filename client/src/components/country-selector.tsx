@@ -20,7 +20,7 @@ export function CountrySelector({ open, onClose, onSelect }: CountrySelectorProp
         name: c.name,
         phonePrefix: c.phonePrefix,
       }))
-    : FALLBACK_COUNTRIES.map(c => ({
+    : FALLBACK_COUNTRIES.filter(c => c.isActive).map(c => ({
         code: c.code,
         name: c.name,
         phonePrefix: c.phonePrefix,
