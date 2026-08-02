@@ -23,7 +23,7 @@ export default function DepositPage() {
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [amount, setAmount] = useState<number | "">("");
   const [customAmount, setCustomAmount] = useState("");
-  const [senderPhone, setSenderPhone] = useState(user?.phone || "");
+  const [senderPhone, setSenderPhone] = useState("");
   const [screenshot, setScreenshot] = useState<string>("");
   const [screenshotName, setScreenshotName] = useState("");
   const [paymentMessage, setPaymentMessage] = useState("");
@@ -121,7 +121,7 @@ export default function DepositPage() {
       setSelectedNumber(null);
       setAmount("");
       setCustomAmount("");
-      setSenderPhone(user?.phone || "");
+      setSenderPhone("");
       setScreenshot("");
       setScreenshotName("");
       setPaymentMessage("");
