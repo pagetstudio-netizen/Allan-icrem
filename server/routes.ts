@@ -669,8 +669,11 @@ export async function registerRoutes(
     ownerName: z.string().min(2).max(100).regex(/^[A-Za-zÀ-öø-ÿ0-9\s\-'.]+$/, "Nom invalide"),
     phone: z.string().min(6).max(20).regex(/^[\d\s\-+()]+$/, "Numéro invalide"),
     operatorName: z.string().min(2).max(60),
-    country: z.string().length(2).regex(/^[A-Z]{2}$/),
-    logoUrl: z.string().url().max(500).optional().nullable(),
+    country: z.string().min(2).max(3).regex(/^[A-Z]{2,3}$/),
+    logoUrl: z.preprocess(
+      (val) => (val === "" || val === undefined ? null : val),
+      z.string().url("URL du logo invalide").max(500).nullable()
+    ),
     isActive: z.boolean().optional(),
   });
 
