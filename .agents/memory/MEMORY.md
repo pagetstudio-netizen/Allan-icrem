@@ -1,0 +1,1 @@
+- [Jollibee Platform Setup](jollibee-platform.md) — Key decisions, countries (TD/NE only), settings values, and DB quirks for this investment platform.
