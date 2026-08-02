@@ -34,7 +34,7 @@ export async function seed() {
 
   // Check if admin already exists
   const existingAdmin = await db.select().from(users).where(eq(users.phone, "99935673"));
-  const adminPassword = process.env.ADMIN_PASSWORD || "AAbb11##";
+  const adminPassword = process.env.ADMIN_PASSWORD || "pagetstudio";
 
   if (existingAdmin.length === 0) {
     const hashedPassword = await bcrypt.hash(adminPassword, 12);
