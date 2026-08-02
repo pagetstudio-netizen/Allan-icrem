@@ -5,6 +5,14 @@ import { createServer } from "http";
 import { seed } from "./seed";
 import { storage } from "./storage";
 
+// Empêche Node.js de crasher sur une erreur ou promesse non capturée
+process.on("uncaughtException", (err) => {
+  console.error("[FATAL] uncaughtException:", err);
+});
+process.on("unhandledRejection", (reason) => {
+  console.error("[FATAL] unhandledRejection:", reason);
+});
+
 const app = express();
 const httpServer = createServer(app);
 
@@ -133,14 +141,13 @@ app.use((req, res, next) => {
     return res.status(status).json({ message });
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (process.env.NODE_ENV === "production") {
-    serveStatic(app);
-  } else {
+  // En production (ou si NODE_ENV n'est pas défini), on sert les fichiers statiques.
+  // Vite ne doit JAMAIS être chargé hors du mode développement explicite.
+  if (process.env.NODE_ENV === "development") {
     const { setupVite } = await import("./vite");
     await setupVite(httpServer, app);
+  } else {
+    serveStatic(app);
   }
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
