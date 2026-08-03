@@ -368,7 +368,7 @@ export const registerSchema = z.object({
     .string()
     .min(2, "Le nom complet est requis")
     .max(100, "Nom trop long")
-    .regex(/^[A-Za-zÀ-öø-ÿ\s\-'.]+$/, "Caractères non autorisés dans le nom"),
+    .regex(/^[A-Za-z0-9À-öø-ÿ\s\-'._]+$/, "Caractères non autorisés dans le nom"),
   phone: phoneSchema,
   country: countryCodeSchema,
   password: z

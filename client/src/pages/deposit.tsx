@@ -85,13 +85,37 @@ export default function DepositPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      toast({ title: "Fichier trop grand", description: "Max 5 Mo", variant: "destructive" });
+    if (file.size > 15 * 1024 * 1024) {
+      toast({ title: "Fichier trop grand", description: "Max 15 Mo", variant: "destructive" });
       return;
     }
     setScreenshotName(file.name);
+    // Compression canvas — redimensionne et compresse sous 800 Ko
     const reader = new FileReader();
-    reader.onload = (ev) => setScreenshot(ev.target?.result as string);
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX_PX = 1200; // largeur/hauteur max
+        let w = img.width;
+        let h = img.height;
+        if (w > MAX_PX || h > MAX_PX) {
+          if (w > h) { h = Math.round((h * MAX_PX) / w); w = MAX_PX; }
+          else       { w = Math.round((w * MAX_PX) / h); h = MAX_PX; }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        canvas.getContext("2d")!.drawImage(img, 0, 0, w, h);
+        // Qualité progressive jusqu'à tenir sous 800 Ko base64
+        let quality = 0.82;
+        let dataUrl = canvas.toDataURL("image/jpeg", quality);
+        while (dataUrl.length > 800_000 && quality > 0.3) {
+          quality -= 0.1;
+          dataUrl = canvas.toDataURL("image/jpeg", quality);
+        }
+        setScreenshot(dataUrl);
+      };
+      img.src = ev.target?.result as string;
+    };
     reader.readAsDataURL(file);
   };
 
