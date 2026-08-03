@@ -33,8 +33,7 @@ export default function WalletPage() {
   const balance = parseFloat(user?.balance || "0");
   const fmt = (n: number) => n.toLocaleString("fr-FR");
 
-  const userCountryObj = apiCountries.find(c => c.code === user?.country);
-  const paymentMethods = userCountryObj ? getPaymentMethodsForCountry(userCountryObj) : [];
+  const paymentMethods = getPaymentMethodsForCountry(user?.country || "", apiCountries.length ? apiCountries : undefined);
 
   const addMutation = useMutation({
     mutationFn: async () => {
