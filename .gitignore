@@ -4,3 +4,5 @@ server/public
 vite.config.ts.*
 *.tar.gz
 uploads/
+# Lock file — régénéré par Plesk avec son propre registry
+package-lock.json
